@@ -4,6 +4,9 @@
         "localStorage": true,
         "fetch" : true
     },
+    "env": {
+        "browser": true
+    },
     "rules": {
         "indent": ["error", 4],
         "linebreak-style": 0,

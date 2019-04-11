@@ -11,11 +11,14 @@
 <body>
     <form></form>
         <div class="container">
-            <label for="uname"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="uname" id="uname" value="admin" required>
+            <label for="server"><b>Server</b></label>
+            <input  id="server" name="server" type="text" placeholder="Server address" value="http://api.beescreens.ch" required>
+
+            <label for="username"><b>Username</b></label>
+            <input id="username" name="username" type="text" placeholder="Username" value="admin" required>
         
-            <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="psw" id="psw" value="admin" required>
+            <label for="password"><b>Password</b></label>
+            <input id="password" name="password" type="password" placeholder="Password" value="admin" required>
         
             <button type="submit" onclick="login()">Login</button>
         </div>

@@ -1,42 +1,46 @@
-/* eslint-disable no-restricted-syntax */
-let jwt = null;
-
-const apiAddress = 'http://192.168.99.100:8080';
-const sessionsEndpoint = '/sessions';
-const loginEndpoint = '/login';
+let token = null;
 
 function deleteApi(endpoint, id) {
-    return fetch(`${apiAddress}${endpoint}/${id}`, {
+    // eslint-disable-next-line no-console
+    console.log(`Delete on '${endpoint}'. ID: ${id}`);
+
+    return fetch(`${endpoint}/${id}`, {
         method: 'DELETE',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwt}`,
+            Authorization: `Bearer ${token}`,
         },
     })
         .then(response => response);
 }
 
-function post(endpoint, content) {
-    return fetch(`${apiAddress}${endpoint}`, {
+function getApi(endpoint) {
+    // eslint-disable-next-line no-console
+    console.log(`Get on '${endpoint}'.`);
+
+    return fetch(`${endpoint}`, {
+        method: 'GET',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+    })
+        .then(response => response.json());
+}
+
+function postApi(endpoint, payload) {
+    // eslint-disable-next-line no-console
+    console.log(`Post on '${endpoint}'.`);
+
+    return fetch(`${endpoint}`, {
         method: 'POST',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(content),
-    })
-        .then(response => response.json());
-}
-
-function get(endpoint) {
-    return fetch(`${apiAddress}${endpoint}`, {
-        method: 'GET',
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${jwt}`,
-        },
+        body: JSON.stringify(payload),
     })
         .then(response => response.json());
 }
@@ -54,23 +58,23 @@ function tableCreate() {
     tbl.style.width = '100px';
     tbl.style.border = '1px solid black';
 
-    let displayersNbr = 0;
+    let displayerNumber = 0;
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i += 1) {
         const tr = tbl.insertRow();
-        for (let j = 0; j < 8; j++) {
+        for (let j = 0; j < 8; j += 1) {
             const td = tr.insertCell();
 
             if (disposition[i][j]) {
-                displayersNbr++;
+                displayerNumber += 1;
                 // td.appendChild(document.createTextNode(`Displayer n° ${displayers_nbr}`));
                 td.style.border = '1px solid black';
 
                 const btn = document.createElement('input');
                 btn.type = 'button';
                 btn.className = 'btn';
-                btn.value = `Displayer n° ${displayersNbr}`;
-                btn.onclick = (function (displayerName) { return function () { kickUser(displayerName); }; }(displayersNbr));
+                btn.value = `Displayer n° ${displayerNumber}`;
+                btn.onclick = (function (displayerName) { return function () { kickUser(displayerName); }; }(displayerNumber));
                 td.appendChild(btn);
             } else {
                 td.appendChild(document.createTextNode('Displayer n°'));
@@ -85,38 +89,36 @@ function tableCreate() {
 
 // eslint-disable-next-line no-unused-vars
 function login() {
-    // eslint-disable-next-line no-undef
-    const x = document.getElementById('uname').value;
-    // eslint-disable-next-line no-undef
-    const y = document.getElementById('psw').value;
-    console.log(`login ${x} ${y}`);
+    const server = document.getElementById('server').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
     const credentials = {
-        username: x,
-        password: y,
+        username,
+        password,
     };
 
-    post(loginEndpoint, credentials)
+    const endpoint = `${server}/login`;
+
+    postApi(endpoint, credentials)
         .then((response) => {
-            jwt = response.jwt;
+            token = response.jwt;
+            // eslint-disable-next-line no-console
+            console.log('Logged in.');
         });
 }
 
 function kickUser(displayerId) {
-    get(sessionsEndpoint)
-        .then((sessions) => {
-            console.log(sessions);
+    const server = document.getElementById('server').value;
+    const endpoint = `${server}/sessions`;
 
-            sessions.forEach((session) => {
-                console.log('session.displayerId', session.displayerId);
-                console.log('displayerId', displayerId);
-                if (JSON.parse(session.displayerId) === JSON.parse(displayerId)) {
-                    console.log('coucou');
-                    deleteApi(sessionsEndpoint, session.id)
-                    .catch(err => {
-                        console.log('err', err);
-                    })
-                }
-            });
+    getApi(endpoint)
+        .then((sessions) => {
+            const session = sessions.find(element => JSON.parse(element.displayerId) === JSON.parse(displayerId));
+
+            if (session != null) {
+                deleteApi(endpoint, session.id);
+            }
         })
         .catch((err) => {
             console.log(err);
